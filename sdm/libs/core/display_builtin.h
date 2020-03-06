@@ -80,6 +80,7 @@ class DisplayBuiltIn : public DisplayBase, HWEventHandler, DppsPropIntf {
   virtual DisplayError SetDynamicDSIClock(uint64_t bit_clk_rate);
   virtual DisplayError GetDynamicDSIClock(uint64_t *bit_clk_rate);
   virtual DisplayError GetSupportedDSIClock(std::vector<uint64_t> *bitclk_rates);
+  virtual DisplayError SetFrameTriggerMode(FrameTriggerMode mode);
 
   // Implement the HWEventHandlers
   virtual DisplayError VSync(int64_t timestamp);
@@ -113,6 +114,7 @@ class DisplayBuiltIn : public DisplayBase, HWEventHandler, DppsPropIntf {
   int previous_retire_fence_ = -1;
   float level_remainder_ = 0.0f;
   recursive_mutex brightness_lock_;
+  FrameTriggerMode trigger_mode_debug_ = kFrameTriggerMax;
 };
 
 }  // namespace sdm
