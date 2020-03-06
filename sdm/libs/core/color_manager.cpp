@@ -211,11 +211,11 @@ DisplayError ColorManagerProxy::Commit() {
   SCOPE_LOCK(locker);
 
   DisplayError ret = kErrorNone;
-  if (pp_features_.IsDirty()) {
-    if (feature_intf_) {
-      FrameTriggerMode mode;
-      feature_intf_->SetParams(kFeatureSwitchMode, &mode);
-    }
+  bool is_dirty = pp_features_.IsDirty();
+  if (feature_intf_) {
+    feature_intf_->SetParams(kFeatureSwitchMode, &is_dirty);
+  }
+  if (is_dirty) {
     ret = hw_intf_->SetPPFeatures(&pp_features_);
   }
 
@@ -323,26 +323,30 @@ DisplayError ColorFeatureCheckingImpl::Deinit() {
 DisplayError ColorFeatureCheckingImpl::SetParams(FeatureOps param_type,
                                                  void *payload) {
   DisplayError error = kErrorNone;
-  FrameTriggerMode *mode;
+  FrameTriggerMode mode = kFrameTriggerDefault;
 
   if (!payload) {
     DLOGE("Invalid input payload");
     return kErrorParameters;
   }
-  mode = reinterpret_cast<FrameTriggerMode *>(payload);
 
+  if (!curr_state_) {
+    DLOGE("Invalid curr state");
+    return kErrorParameters;
+  }
+
+  bool is_dirty = *reinterpret_cast<bool *>(payload);
   switch (param_type) {
   case kFeatureSwitchMode:
-    CheckColorFeature(mode);
-    if (curr_state_) {
-      DLOGV_IF(kTagQDCM, "Set frame trigger mode %d", *mode);
-      error = curr_state_->SetParams(param_type, mode);
-      if (error) {
-        DLOGE_IF(kTagQDCM, "Failed to set params to state, error %d", error);
-      }
+    if (is_dirty) {
+      CheckColorFeature(&mode);
     } else {
-      DLOGE_IF(kTagQDCM, "curr_state_ NULL");
-      error = kErrorUndefined;
+      mode = kFrameTriggerPostedStart;
+    }
+    DLOGV_IF(kTagQDCM, "Set frame trigger mode %d", mode);
+    error = curr_state_->SetParams(param_type, &mode);
+    if (error) {
+      DLOGE_IF(kTagQDCM, "Failed to set params to state, error %d", error);
     }
     break;
   default:
@@ -359,6 +363,11 @@ DisplayError ColorFeatureCheckingImpl::GetParams(FeatureOps param_type,
 
   if (!payload) {
     DLOGE("Invalid input payload");
+    return kErrorParameters;
+  }
+
+  if (!curr_state_) {
+    DLOGE("Invalid curr state");
     return kErrorParameters;
   }
 
@@ -385,6 +394,12 @@ DisplayError ColorFeatureCheckingImpl::GetParams(FeatureOps param_type,
 void ColorFeatureCheckingImpl::CheckColorFeature(FrameTriggerMode *mode) {
   PPFeatureInfo *feature = NULL;
   PPGlobalColorFeatureID id = kMaxNumPPFeatures;
+
+  if (!pp_features_) {
+    DLOGW("Invalid pp features");
+    *mode = kFrameTriggerPostedStart;
+    return;
+  }
 
   for (uint32_t i = 0; i < single_buffer_feature_.size(); i++) {
     id = single_buffer_feature_[i];
@@ -414,8 +429,13 @@ DisplayError FeatureStatePostedStart::SetParams(FeatureOps param_type,
   DisplayError error = kErrorNone;
   FrameTriggerMode mode = kFrameTriggerPostedStart;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
@@ -447,8 +467,13 @@ DisplayError FeatureStatePostedStart::GetParams(FeatureOps param_type,
                                                 void *payload) {
   DisplayError error = kErrorNone;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
@@ -481,8 +506,13 @@ DisplayError FeatureStateDefaultTrigger::SetParams(FeatureOps param_type,
   DisplayError error = kErrorNone;
   FrameTriggerMode mode = kFrameTriggerDefault;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
@@ -514,8 +544,13 @@ DisplayError FeatureStateDefaultTrigger::GetParams(FeatureOps param_type,
                                                    void *payload) {
   DisplayError error = kErrorNone;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
@@ -548,8 +583,13 @@ DisplayError FeatureStateSerializedTrigger::SetParams(FeatureOps param_type,
   DisplayError error = kErrorNone;
   FrameTriggerMode mode = kFrameTriggerSerialize;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
@@ -581,8 +621,13 @@ DisplayError FeatureStateSerializedTrigger::GetParams(FeatureOps param_type,
                                                       void *payload) {
   DisplayError error = kErrorNone;
 
-  if (!obj_ || !payload) {
-    DLOGE("Invalid param obj_ %p payload %p", obj_, payload);
+  if (!obj_) {
+    DLOGE("Invalid param obj_");
+    return kErrorParameters;
+  }
+
+  if (!payload) {
+    DLOGE("Invalid payload");
     return kErrorParameters;
   }
 
