@@ -26,6 +26,8 @@ COMMON_PATH := device/xiaomi/sm6125-common
 
 BOARD_VENDOR := xiaomi
 
+BUILD_BROKEN_USES_BUILD_COPY_HEADERS := true
+
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := trinket
 TARGET_NO_BOOTLOADER := true
