@@ -209,6 +209,16 @@ DisplayError DisplayBuiltIn::Commit(LayerStack *layer_stack) {
     }
   }
 
+  if (trigger_mode_debug_ != kFrameTriggerMax) {
+    error = hw_intf_->SetFrameTrigger(trigger_mode_debug_);
+    if (error != kErrorNone) {
+      DLOGE("Failed to set frame trigger mode %d, err %d", (int)trigger_mode_debug_, error);
+    } else {
+      DLOGV_IF(kTagDisplay, "Set frame trigger mode %d", trigger_mode_debug_);
+      trigger_mode_debug_ = kFrameTriggerMax;
+    }
+  }
+
   if (vsync_enable_) {
     DTRACE_BEGIN("RegisterVsync");
     // wait for previous frame's retire fence to signal.
@@ -419,6 +429,12 @@ DisplayError DisplayBuiltIn::SetRefreshRate(uint32_t refresh_rate, bool final_ra
       return error;
     }
 
+    if (handle_idle_timeout_) {
+      is_idle_timeout_ = true;
+    } else {
+      is_idle_timeout_ = false;
+    }
+
     error = comp_manager_->CheckEnforceSplit(display_comp_ctx_, refresh_rate);
     if (error != kErrorNone) {
       return error;
@@ -611,6 +627,13 @@ DisplayError DisplayBuiltIn::SetDisplayDppsAdROI(void *payload) {
     DLOGE("Failed to set ad roi config, err %d", err);
 
   return err;
+}
+
+DisplayError DisplayBuiltIn::SetFrameTriggerMode(FrameTriggerMode mode) {
+  lock_guard<recursive_mutex> obj(recursive_mutex_);
+
+  trigger_mode_debug_ = mode;
+  return kErrorNone;
 }
 
 void DppsInfo::Init(DppsPropIntf *intf, const std::string &panel_name) {

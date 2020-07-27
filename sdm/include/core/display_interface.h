@@ -164,6 +164,14 @@ enum QSyncMode {
   kQsyncModeOneShotContinuous,  // This is set by client to enable qsync only for every commit.
 };
 
+/*! @brief This enum defines frame trigger modes. */
+enum FrameTriggerMode {
+  kFrameTriggerDefault,      //!< Wait for pp_done of previous frame to trigger new frame
+  kFrameTriggerSerialize,    //!< Trigger new frame and wait for pp_done of this frame
+  kFrameTriggerPostedStart,  //!< Posted start mode, trigger new frame without pp_done
+  kFrameTriggerMax,
+};
+
 /*! @brief This structure defines configuration for display dpps ad4 region of interest. */
 struct DisplayDppsAd4RoiCfg {
   uint32_t h_start;     //!< start in hotizontal direction
@@ -804,6 +812,12 @@ class DisplayInterface {
     @return \link DisplayError \endlink
   */
   virtual DisplayError TeardownConcurrentWriteback(void) = 0;
+
+  /*! @brief Method to set frame trigger mode for primary display.
+    @param[in] frame trigger mode
+    @return \link DisplayError \endlink
+  */
+  virtual DisplayError SetFrameTriggerMode(FrameTriggerMode mode) = 0;
 
   /*
    * Returns a string consisting of a dump of SDM's display and layer related state

@@ -151,6 +151,9 @@ class DisplayBase : public DisplayInterface {
                                                     uint8_t *out_data);
   virtual bool CanSkipValidate();
   virtual DisplayError GetRefreshRate(uint32_t *refresh_rate) { return kErrorNotSupported; }
+  virtual DisplayError SetFrameTriggerMode(FrameTriggerMode mode) {
+    return kErrorNotSupported;
+  }
 
  protected:
   const char *kBt2020Pq = "bt2020_pq";
@@ -183,7 +186,7 @@ class DisplayBase : public DisplayInterface {
   PrimariesTransfer GetBlendSpaceFromColorMode();
   bool IsHdrMode(const AttrVal &attr);
   void InsertBT2020PqHlgModes();
-
+  bool is_idle_timeout_ = false;
   recursive_mutex recursive_mutex_;
   int32_t display_id_ = -1;
   DisplayType display_type_;
