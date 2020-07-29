@@ -139,6 +139,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.surface_flinger.has_wide_color_display=true \
     ro.surface_flinger.use_color_management=true \
     ro.vendor.display.cabl=0 \
+    vendor.display.disable_excl_rect_partial_fb=1 \
     vendor.display.disable_skip_validate=1 \
     vendor.display.enable_default_color_mode=1 \
     vendor.gralloc.enable_fb_ubwc=1
