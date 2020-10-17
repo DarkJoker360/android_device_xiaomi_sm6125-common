@@ -1,0 +1,4 @@
+service vendor.power /vendor/bin/hw/android.hardware.power-service.ginkgo
+    class hal
+    user system
+    group system
