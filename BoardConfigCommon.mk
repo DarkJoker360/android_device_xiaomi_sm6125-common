@@ -150,7 +150,7 @@ TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 TARGET_PROVIDES_QTI_TELEPHONY_JAR := true
 
 # Sepolicy - Common
-include device/qcom/sepolicy_vndr/SEPolicy.mk
+include device/qcom/sepolicy_vndr-legacy-um/SEPolicy.mk
 
 # Sepolicy - Trinket
 BOARD_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
